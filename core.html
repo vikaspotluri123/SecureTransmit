@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+	<head>
+		<title></title>
+		<script type="text/javascript" src="https://rawgit.com/ricmoo/aes-js/master/index.js"></script>
+		<style>
+			body
+			{
+				background-color:#212121;
+				color:white;
+			}
+			#encoded-data{color:red;}
+			#decoded-data{color:green;}
+			button, input[type=submit]
+			{
+				background:#ccc;
+				border:1px solid #212121;
+				padding:.2%;
+				color:#1c1c1c;
+				font-size:1.2rem;
+				text-align:center;
+				cursor:pointer;
+				transition:0.5s;
+			}
+			button:hover, input[type=submit]:hover
+			{
+				background:#212121;
+				color:#ccc;
+				transition:0.5s;
+				border:1px solid white;
+			}
+			#data,#decrypter
+			{
+				margin:1% auto;
+			}
+			.unknown
+			{
+				font-style:italic;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="data">
+			<div id="encoded-data">test</div>
+			<div id="decoded-data"><div class="unknown">Unknown encrypted data</div></div>
+		</div>
+		<div id="decrypter">
+			<div id="messages"></div>
+			<input type="password" id="key" name="key" value="mt" />
+			<input type="submit" id="submit" name="submit" value="Decrypt" />
+		</div>
+		<button id="enc2dec">Decode encrypted data</button>
+		<script type="text/javascript">
+			const ALLOWED_LENGTHS = [16,24,32];
+			var toBytes = aesjs.util.convertStringToBytes, bToString = aesjs.util.convertBytesToString;
+			document.getElementById("submit").addEventListener("click",decode);
+			document.getElementById("enc2dec").addEventListener("click",enc2dec);
+			function enc2dec()
+			{
+				document.getElementById("encoded-data").innerHTML = document.getElementById("decoded-data").innerHTML;
+				document.getElementById("decoded-data").innerHTML = "";
+			}
+			function decode()
+			{
+				document.getElementById("decoded-data").innerHTML =
+					decrypt(
+							document.getElementById("key").value,
+							document.getElementById("encoded-data").innerHTML
+						);
+			}
+			function decrypt(key,data)
+			{
+				key = key || ""; //Make sure key isn't null
+				key = buffKey(key,32); //Convert key to 32 byte key by adding padding
+				if(typeof data === null)
+					throw new Exception("MUST Provide data >.< - function decrypt");
+				key = typeof key === "object" ? key : toBytes(key), data = (typeof data === "object") ? data : data = toBytes(data);
+				return bToString(new aesjs.ModeOfOperation.ctr(key).decrypt(data));
+			}
+			function buffKey(pattern,length,prefix)
+			{
+				pattern = pattern || "vsvp", length = (ALLOWED_LENGTHS.indexOf(parseInt(length)) >= 0) ? length : 32, prefix = prefix || "";
+				return (prefix.length > length) ? prefix.substr(0,length) : buffKey(pattern, length, prefix + pattern);
+			}
+		</script>
+	</body>
+</html>
